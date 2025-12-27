@@ -167,7 +167,199 @@ h1 {
 }
 
 /* Wiki content styling */
-.wiki-content {\n  background: rgba(30, 30, 40, 0.6);\n  padding: 16px;\n  border-radius: 8px;\n  border: 1px solid rgba(255, 255, 255, 0.1);\n}\n\n/* Table styling */\n.wiki-content table,\n#content table {\n  background: rgba(40, 40, 60, 0.5) !important;\n  border: 1px solid rgba(255, 255, 255, 0.2) !important;\n  border-radius: 6px;\n  overflow: hidden;\n  margin: 16px 0;\n  width: 100% !important;\n  max-width: 100%;\n  display: table;\n  border-collapse: collapse;\n}\n\n.wiki-content table td,\n.wiki-content table th,\n#content table td,\n#content table th {\n  padding: 8px !important;\n  border: 1px solid rgba(255, 255, 255, 0.1) !important;\n  color: #d0d0d0 !important;\n  background: rgba(40, 40, 60, 0.3) !important;\n}\n\n.wiki-content table th,\n#content table th {\n  background: rgba(100, 150, 255, 0.25) !important;\n  font-weight: 600 !important;\n  color: #e0e0e0 !important;\n  text-align: left;\n}\n\n.wiki-content table tr:hover,\n#content table tr:hover {\n  background: rgba(60, 60, 80, 0.4) !important;\n}\n\n/* Image styling */\n.wiki-content img,\n#content img {\n  max-width: 100% !important;\n  height: auto !important;\n  border-radius: 6px;\n  margin: 12px 0;\n  display: block;\n  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\n  border: 1px solid rgba(255, 255, 255, 0.1);\n}\n\n#content h1 {
+.wiki-content {
+  background: rgba(30, 30, 40, 0.6);
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Table styling */
+.wiki-content table,
+#content table {
+  background: rgba(40, 40, 60, 0.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 16px 0;
+  width: 100% !important;
+  max-width: 100%;
+  display: table;
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
+.wiki-content table td,
+.wiki-content table th,
+#content table td,
+#content table th {
+  padding: 8px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #d0d0d0 !important;
+  background: rgba(40, 40, 60, 0.3) !important;
+  vertical-align: middle;
+}
+
+.wiki-content table th,
+#content table th {
+  background: rgba(100, 150, 255, 0.25) !important;
+  font-weight: 600 !important;
+  color: #e0e0e0 !important;
+  text-align: left;
+}
+
+.wiki-content table tr:hover,
+#content table tr:hover {
+  background: rgba(60, 60, 80, 0.4) !important;
+}
+
+/* Images in table cells */
+.wiki-content table img,
+#content table img {
+  display: inline-block !important;
+  max-width: 100px !important;
+  max-height: 100px !important;
+  margin: 4px !important;
+  box-shadow: none !important;
+  border: none !important;
+  vertical-align: middle;
+}
+
+/* Sprite icons (Minecraft wiki uses these for items/blocks) */
+.wiki-content .sprite,
+.wiki-content .inv-sprite,
+.wiki-content .item-sprite,
+.wiki-content .block-sprite,
+#content .sprite,
+#content .inv-sprite,
+#content .item-sprite,
+#content .block-sprite {
+  display: inline-block !important;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  width: 16px;
+  height: 16px;
+}
+
+/* Larger sprites (32x32) */
+.wiki-content .sprite[style*="-32px"],
+#content .sprite[style*="-32px"] {
+  width: 32px;
+  height: 32px;
+}
+
+/* Sprites in tables */
+.wiki-content table .sprite,
+.wiki-content table .inv-sprite,
+#content table .sprite,
+#content table .inv-sprite {
+  margin: 2px;
+}
+
+/* Image styling */
+.wiki-content img,
+#content img {
+  max-width: 100% !important;
+  height: auto !important;
+  border-radius: 6px;
+  margin: 12px 0;
+  display: block;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Infobox images */
+.wiki-content .portable-infobox img,
+.wiki-content .infobox img,
+.wiki-content .pi-image img,
+#content .portable-infobox img,
+#content .infobox img,
+#content .pi-image img {
+  max-width: 200px !important;
+  margin: 8px auto !important;
+}
+
+/* Figure and thumbnail images */
+.wiki-content figure img,
+.wiki-content .thumb img,
+.wiki-content .thumbinner img,
+#content figure img,
+#content .thumb img,
+#content .thumbinner img {
+  max-width: 100% !important;
+  margin: 8px auto !important;
+}
+
+/* Image links - don't style like text links */
+.wiki-content a img,
+#content a img {
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+/* Figure captions */
+.wiki-content figcaption,
+.wiki-content .thumbcaption,
+#content figcaption,
+#content .thumbcaption {
+  font-size: 12px;
+  color: #a0a0a0;
+  text-align: center;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* Hide broken info icons and SVGs */
+.wiki-content .info-icon,
+.wiki-content svg:empty,
+.wiki-content svg use,
+#content .info-icon,
+#content svg:empty,
+#content svg use {
+  display: none !important;
+}
+
+/* Figure styling */
+.wiki-content figure,
+#content figure {
+  margin: 12px 0;
+  max-width: 100%;
+}
+
+.wiki-content figure a,
+#content figure a {
+  display: block;
+}
+
+/* Remove empty anchors styling */
+.wiki-content a:empty,
+#content a:empty {
+  display: none;
+}
+
+/* Gallery styling */
+.wiki-content .gallery,
+#content .gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.wiki-content .gallerybox,
+#content .gallerybox {
+  flex: 0 0 auto;
+}
+
+.wiki-content .gallerybox img,
+#content .gallerybox img {
+  max-width: 120px !important;
+  max-height: 120px !important;
+}
+
+#content h1 {
   color: #e8e8e8;
   font-size: 24px;
   margin: 20px 0 12px 0;
