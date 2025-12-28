@@ -1,4 +1,4 @@
-const { BrowserWindow, app } = require("electron");
+const { BrowserWindow, app, webContents } = require("electron");
 const path = require("path");
 const fs = require("fs");
 
@@ -48,6 +48,21 @@ function createWindow() {
   });
 
   mainWindow.loadFile("renderer/index.html");
+
+  // Handle webview webContents - increase max listeners to prevent warnings
+  // Webviews add internal listeners during navigation which can trigger warnings
+  mainWindow.webContents.on('did-attach-webview', (event, webviewContents) => {
+    webviewContents.setMaxListeners(50);
+    
+    // Suppress ERR_ABORTED errors that occur during rapid navigation
+    // These are normal when user navigates before previous page finishes loading
+    webviewContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
+      // ERR_ABORTED (-3) is expected when navigating away quickly
+      if (errorCode === -3) {
+        return; // Silently ignore
+      }
+    });
+  });
 
   // Optional: make movable by dragging background
   mainWindow.setMovable(true);

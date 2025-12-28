@@ -86,7 +86,7 @@ function isButtonJustPressed(currentButtons, button) {
 
 function handleButtonAction(action) {
     const win = getMainWindow();
-    if (!win) return;
+    if (!win || win.isDestroyed()) return;
 
     // Send action to renderer
     win.webContents.send('gamepad-action', action);
@@ -94,7 +94,7 @@ function handleButtonAction(action) {
 
 function handleAnalogInput(dx, dy) {
     const win = getMainWindow();
-    if (!win) return;
+    if (!win || win.isDestroyed()) return;
 
     // Send analog movement to renderer
     win.webContents.send('analog-input', { dx, dy });
@@ -102,7 +102,7 @@ function handleAnalogInput(dx, dy) {
 
 function handleWindowAction(action) {
     const win = getMainWindow();
-    if (!win) return;
+    if (!win || win.isDestroyed()) return;
 
     switch (action) {
         case 'toggle':
@@ -156,6 +156,10 @@ function clearDpadRepeat(button) {
 
 function pollGamepad() {
     if (!XInputGetState) return;
+    
+    // Check if window still exists
+    const win = getMainWindow();
+    if (!win || win.isDestroyed()) return;
 
     // Create state buffer
     const state = {
@@ -181,7 +185,6 @@ function pollGamepad() {
     }
 
     const buttons = state.Gamepad.wButtons;
-    const win = getMainWindow();
 
     // Guide button handling - using Back + Start combo as pseudo-guide
     // (True Guide button requires undocumented XInputGetStateEx)

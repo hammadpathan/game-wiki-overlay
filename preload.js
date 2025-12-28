@@ -1,14 +1,32 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
+// Track if listeners are already registered to prevent duplicates
+let clickThroughListener = null;
+let gamepadListener = null;
+let analogListener = null;
+
 contextBridge.exposeInMainWorld('electronAPI', {
   onClickThroughChanged: (callback) => {
-    ipcRenderer.on('click-through-changed', (event, enabled) => callback(enabled));
+    // Remove existing listener if any
+    if (clickThroughListener) {
+      ipcRenderer.removeListener('click-through-changed', clickThroughListener);
+    }
+    clickThroughListener = (event, enabled) => callback(enabled);
+    ipcRenderer.on('click-through-changed', clickThroughListener);
   },
   onGamepadAction: (callback) => {
-    ipcRenderer.on('gamepad-action', (event, action) => callback(action));
+    if (gamepadListener) {
+      ipcRenderer.removeListener('gamepad-action', gamepadListener);
+    }
+    gamepadListener = (event, action) => callback(action);
+    ipcRenderer.on('gamepad-action', gamepadListener);
   },
   onAnalogInput: (callback) => {
-    ipcRenderer.on('analog-input', (event, data) => callback(data));
+    if (analogListener) {
+      ipcRenderer.removeListener('analog-input', analogListener);
+    }
+    analogListener = (event, data) => callback(data);
+    ipcRenderer.on('analog-input', analogListener);
   },
   closeWindow: () => {
     ipcRenderer.send('close-window');

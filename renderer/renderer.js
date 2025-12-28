@@ -140,14 +140,37 @@ wiki.addEventListener("did-navigate-in-page", (e) => {
   }
 });
 
+// Navigation state - prevent rapid navigation
+let isNavigating = false;
+let navigationTimeout = null;
+
+function setNavigating(state) {
+  isNavigating = state;
+  if (navigationTimeout) {
+    clearTimeout(navigationTimeout);
+  }
+  if (state) {
+    // Auto-reset after 2 seconds in case did-stop-loading doesn't fire
+    navigationTimeout = setTimeout(() => {
+      isNavigating = false;
+    }, 2000);
+  }
+}
+
 // Safe back navigation - uses our own history tracking
 function safeGoBack() {
   if (!wiki.classList.contains('active')) {
     return false;
   }
   
+  // Prevent rapid navigation
+  if (isNavigating) {
+    return false;
+  }
+  
   // Check if we have history to go back to
   if (currentHistoryIndex > 0) {
+    setNavigating(true);
     currentHistoryIndex--;
     wiki.src = navigationHistory[currentHistoryIndex];
     return true;
@@ -164,7 +187,13 @@ function safeGoForward() {
     return false;
   }
   
+  // Prevent rapid navigation
+  if (isNavigating) {
+    return false;
+  }
+  
   if (currentHistoryIndex < navigationHistory.length - 1) {
+    setNavigating(true);
     currentHistoryIndex++;
     wiki.src = navigationHistory[currentHistoryIndex];
     return true;
@@ -201,6 +230,7 @@ wiki.addEventListener("did-start-loading", () => {
 wiki.addEventListener("did-stop-loading", () => {
   wiki.classList.remove("loading");
   status.textContent = "";
+  setNavigating(false); // Allow new navigation
   
   // Refresh clickable elements after page loads
   if (cursorVisible) {
@@ -210,6 +240,7 @@ wiki.addEventListener("did-stop-loading", () => {
 
 // Handle navigation errors gracefully (suppress about:blank errors)
 wiki.addEventListener("did-fail-load", (e) => {
+  setNavigating(false); // Allow new navigation after error
   // Ignore aborted loads (usually from navigating away quickly or about:blank)
   if (e.errorCode === -3 || e.validatedURL === "about:blank") {
     return;
