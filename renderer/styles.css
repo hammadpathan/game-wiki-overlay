@@ -164,11 +164,16 @@ html, body {
   -webkit-app-region: no-drag;
 }
 
-#toolbar button:hover {
+#toolbar button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+#toolbar button:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.2);
 }
 
-#toolbar button:active {
+#toolbar button:active:not(:disabled) {
   background: rgba(255, 255, 255, 0.25);
 }
 

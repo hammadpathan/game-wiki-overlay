@@ -23,17 +23,13 @@ let currentHistoryIndex = -1;
 
 // Show landing page, hide webview
 function showLandingPage() {
-  // Don't reload if already on landing page
-  if (!landingPage.classList.contains("hidden")) {
-    return;
-  }
-  
   landingPage.classList.remove("hidden");
   wiki.classList.remove("active");
   wiki.src = "about:blank";
   searchInput.value = "";
   searchInput.placeholder = "Select a wiki first...";
   searchInput.disabled = true;
+  searchBtn.disabled = true;
   
   // Clear navigation history
   navigationHistory = [];
@@ -50,6 +46,7 @@ function showWiki(baseUrl, searchUrl) {
   wiki.src = baseUrl;
   searchInput.disabled = false;
   searchInput.placeholder = "Search wiki...";
+  searchBtn.disabled = false;
 }
 
 // Wiki card selection
@@ -859,10 +856,10 @@ if (window.electronAPI) {
         
       // Actions
       case 'click':
-        // Check if we're clicking on a text input - open OSK
+        // Check if we're clicking on a text input - open OSK (only if not disabled)
         if (currentHighlightedElement && !currentHighlightedElement.isWebviewElement) {
           const el = currentHighlightedElement.element;
-          if (el.tagName === 'INPUT' && (el.type === 'text' || el.type === 'search' || !el.type)) {
+          if (el.tagName === 'INPUT' && (el.type === 'text' || el.type === 'search' || !el.type) && !el.disabled) {
             showOSK(el);
             return;
           }
@@ -883,9 +880,11 @@ if (window.electronAPI) {
         hideCursor();
         break;
       case 'search':
-        // X button - open keyboard for search
-        showCursor();
-        showOSK(searchInput);
+        // X button - open keyboard for search (only when wiki is active)
+        if (wiki.classList.contains('active') && !searchInput.disabled) {
+          showCursor();
+          showOSK(searchInput);
+        }
         break;
       case 'start':
         // Start button does nothing when OSK is closed (it's handled in the OSK section above)
