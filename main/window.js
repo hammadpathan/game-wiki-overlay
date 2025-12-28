@@ -52,7 +52,7 @@ function createWindow() {
   // Handle webview webContents - increase max listeners to prevent warnings
   // Webviews add internal listeners during navigation which can trigger warnings
   mainWindow.webContents.on('did-attach-webview', (event, webviewContents) => {
-    webviewContents.setMaxListeners(50);
+    webviewContents.setMaxListeners(0);
     
     // Suppress ERR_ABORTED errors that occur during rapid navigation
     // These are normal when user navigates before previous page finishes loading

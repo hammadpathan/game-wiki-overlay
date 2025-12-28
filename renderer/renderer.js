@@ -23,17 +23,13 @@ let currentHistoryIndex = -1;
 
 // Show landing page, hide webview
 function showLandingPage() {
-  // Don't reload if already on landing page
-  if (!landingPage.classList.contains("hidden")) {
-    return;
-  }
-  
   landingPage.classList.remove("hidden");
   wiki.classList.remove("active");
   wiki.src = "about:blank";
   searchInput.value = "";
   searchInput.placeholder = "Select a wiki first...";
   searchInput.disabled = true;
+  searchBtn.disabled = true;
   
   // Clear navigation history
   navigationHistory = [];
@@ -50,6 +46,7 @@ function showWiki(baseUrl, searchUrl) {
   wiki.src = baseUrl;
   searchInput.disabled = false;
   searchInput.placeholder = "Search wiki...";
+  searchBtn.disabled = false;
 }
 
 // Wiki card selection
@@ -301,6 +298,136 @@ opacitySlider.addEventListener('input', (e) => {
     window.electronAPI.setOpacity(opacity);
   }
 });
+
+// ===== On-Screen Keyboard =====
+const osk = document.getElementById('osk');
+const oskKeys = document.getElementById('osk-keys');
+const oskInputText = document.getElementById('osk-input-text');
+
+// Keyboard layouts
+const KEYBOARD_LAYOUTS = {
+  letters: [
+    'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',
+    'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', "'",
+    'Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '-'
+  ],
+  numbers: [
+    '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
+    '!', '@', '#', '$', '%', '^', '&', '*', '(', ')',
+    '+', '=', '[', ']', '{', '}', ':', ';', '"', '?'
+  ]
+};
+
+let oskVisible = false;
+let oskSelectedIndex = 0;
+let oskCurrentLayout = 'letters';
+let oskInputValue = '';
+let oskTargetInput = null; // Which input we're typing into
+let oskLastAnalogNav = 0; // Debounce analog navigation
+
+function showOSK(targetInput) {
+  oskTargetInput = targetInput;
+  oskInputValue = targetInput.value || '';
+  oskSelectedIndex = 0;
+  oskVisible = true;
+  osk.classList.remove('hidden');
+  renderOSKKeys();
+  updateOSKPreview();
+  hideCursor(); // Hide the main cursor while OSK is active
+}
+
+function hideOSK(submit = false) {
+  if (submit && oskTargetInput) {
+    oskTargetInput.value = oskInputValue;
+    // Trigger search if it's the search input
+    if (oskTargetInput === searchInput) {
+      performSearch();
+    } else if (oskTargetInput === wikiUrlInput) {
+      goToCustomUrl();
+    }
+  }
+  oskVisible = false;
+  osk.classList.add('hidden');
+  oskTargetInput = null;
+  showCursor(); // Restore the main cursor
+}
+
+function renderOSKKeys() {
+  const keys = KEYBOARD_LAYOUTS[oskCurrentLayout];
+  oskKeys.innerHTML = '';
+  
+  keys.forEach((key, index) => {
+    const keyEl = document.createElement('div');
+    keyEl.className = 'osk-key' + (index === oskSelectedIndex ? ' selected' : '');
+    keyEl.textContent = key;
+    keyEl.dataset.index = index;
+    keyEl.addEventListener('click', () => {
+      oskInputValue += key.toLowerCase();
+      updateOSKPreview();
+    });
+    oskKeys.appendChild(keyEl);
+  });
+}
+
+function updateOSKPreview() {
+  oskInputText.textContent = oskInputValue || '';
+}
+
+function oskNavigate(direction) {
+  const keys = KEYBOARD_LAYOUTS[oskCurrentLayout];
+  const cols = 10;
+  const rows = Math.ceil(keys.length / cols);
+  
+  let col = oskSelectedIndex % cols;
+  let row = Math.floor(oskSelectedIndex / cols);
+  
+  switch (direction) {
+    case 'up':
+      row = (row - 1 + rows) % rows;
+      break;
+    case 'down':
+      row = (row + 1) % rows;
+      break;
+    case 'left':
+      col = (col - 1 + cols) % cols;
+      break;
+    case 'right':
+      col = (col + 1) % cols;
+      break;
+  }
+  
+  let newIndex = row * cols + col;
+  if (newIndex >= keys.length) {
+    newIndex = keys.length - 1;
+  }
+  
+  oskSelectedIndex = newIndex;
+  renderOSKKeys();
+}
+
+function oskTypeSelected() {
+  const keys = KEYBOARD_LAYOUTS[oskCurrentLayout];
+  if (oskSelectedIndex < keys.length) {
+    oskInputValue += keys[oskSelectedIndex].toLowerCase();
+    updateOSKPreview();
+  }
+}
+
+function oskBackspace() {
+  oskInputValue = oskInputValue.slice(0, -1);
+  updateOSKPreview();
+}
+
+function oskSpace() {
+  oskInputValue += ' ';
+  updateOSKPreview();
+}
+
+function oskSwitchLayout() {
+  oskCurrentLayout = oskCurrentLayout === 'letters' ? 'numbers' : 'letters';
+  oskSelectedIndex = Math.min(oskSelectedIndex, KEYBOARD_LAYOUTS[oskCurrentLayout].length - 1);
+  renderOSKKeys();
+}
 
 // ===== Gamepad Hybrid Navigation System =====
 // Free-moving cursor that highlights nearest clickable element
@@ -642,6 +769,48 @@ function scrollPage(deltaX, deltaY) {
 // Handle gamepad actions
 if (window.electronAPI) {
   window.electronAPI.onGamepadAction((action) => {
+    // If OSK is visible, handle keyboard navigation
+    if (oskVisible) {
+      switch (action) {
+        case 'cursor-up':
+        case 'cursor-up-fast':
+          oskNavigate('up');
+          break;
+        case 'cursor-down':
+        case 'cursor-down-fast':
+          oskNavigate('down');
+          break;
+        case 'cursor-left':
+        case 'cursor-left-fast':
+          oskNavigate('left');
+          break;
+        case 'cursor-right':
+        case 'cursor-right-fast':
+          oskNavigate('right');
+          break;
+        case 'click': // A - type selected key
+          oskTypeSelected();
+          break;
+        case 'back': // B - close keyboard
+          hideOSK(false);
+          break;
+        case 'search': // X - backspace
+          oskBackspace();
+          break;
+        case 'home': // Y - space
+          oskSpace();
+          break;
+        case 'page-up': // LB - switch layout
+        case 'page-down': // RB - switch layout
+          oskSwitchLayout();
+          break;
+        case 'start': // Start - submit
+          hideOSK(true);
+          break;
+      }
+      return; // Don't process normal actions while OSK is open
+    }
+    
     switch (action) {
       // D-pad navigation - move cursor in fixed steps
       case 'cursor-up':
@@ -687,6 +856,14 @@ if (window.electronAPI) {
         
       // Actions
       case 'click':
+        // Check if we're clicking on a text input - open OSK (only if not disabled)
+        if (currentHighlightedElement && !currentHighlightedElement.isWebviewElement) {
+          const el = currentHighlightedElement.element;
+          if (el.tagName === 'INPUT' && (el.type === 'text' || el.type === 'search' || !el.type) && !el.disabled) {
+            showOSK(el);
+            return;
+          }
+        }
         clickHighlighted();
         break;
       case 'back':
@@ -703,19 +880,38 @@ if (window.electronAPI) {
         hideCursor();
         break;
       case 'search':
-        showCursor();
-        searchInput.focus();
-        // Move cursor to search input
-        const searchRect = searchInput.getBoundingClientRect();
-        cursorX = searchRect.left + searchRect.width / 2;
-        cursorY = searchRect.top + searchRect.height / 2;
-        updateCursor();
+        // X button - open keyboard for search (only when wiki is active)
+        if (wiki.classList.contains('active') && !searchInput.disabled) {
+          showCursor();
+          showOSK(searchInput);
+        }
+        break;
+      case 'start':
+        // Start button does nothing when OSK is closed (it's handled in the OSK section above)
+        // Could be used for other purposes in the future
         break;
     }
   });
   
   // Handle analog stick input - direct cursor movement
   window.electronAPI.onAnalogInput((data) => {
+    // If OSK is visible, use analog for navigation too
+    if (oskVisible) {
+      const now = Date.now();
+      // Debounce analog input for OSK navigation (150ms between moves)
+      if (now - oskLastAnalogNav < 150) return;
+      
+      if (Math.abs(data.dx) > 4 || Math.abs(data.dy) > 4) {
+        oskLastAnalogNav = now;
+        if (Math.abs(data.dx) > Math.abs(data.dy)) {
+          oskNavigate(data.dx > 0 ? 'right' : 'left');
+        } else {
+          oskNavigate(data.dy > 0 ? 'down' : 'up');
+        }
+      }
+      return;
+    }
+    
     if (data.dx !== 0 || data.dy !== 0) {
       moveCursor(data.dx, data.dy);
     }

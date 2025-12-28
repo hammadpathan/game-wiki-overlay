@@ -117,6 +117,9 @@ function handleWindowAction(action) {
             win.show();
             win.focus();
             break;
+        case 'close':
+            require('electron').app.quit();
+            break;
         case 'hide':
             win.hide();
             break;
@@ -185,6 +188,15 @@ function pollGamepad() {
     }
 
     const buttons = state.Gamepad.wButtons;
+
+    // Back + B combo to close/quit the app
+    if (isButtonPressed(buttons, XINPUT_GAMEPAD_BACK) && isButtonPressed(buttons, XINPUT_GAMEPAD_B)) {
+        if (!isButtonPressed(lastButtons, XINPUT_GAMEPAD_BACK) || !isButtonPressed(lastButtons, XINPUT_GAMEPAD_B)) {
+            handleWindowAction('close');
+        }
+        lastButtons = buttons;
+        return; // Don't process other buttons when using combo
+    }
 
     // Guide button handling - using Back + Start combo as pseudo-guide
     // (True Guide button requires undocumented XInputGetStateEx)
@@ -309,9 +321,9 @@ function pollGamepad() {
             handleButtonAction('page-down');
         }
 
-        // Start button - hide overlay (return to game)
+        // Start button - send to renderer (can be intercepted by OSK for submit)
         if (isButtonJustPressed(buttons, XINPUT_GAMEPAD_START)) {
-            handleWindowAction('hide');
+            handleButtonAction('start');
         }
         
         // Left thumb click - could be used for something

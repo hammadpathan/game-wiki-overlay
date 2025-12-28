@@ -164,11 +164,16 @@ html, body {
   -webkit-app-region: no-drag;
 }
 
-#toolbar button:hover {
+#toolbar button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+#toolbar button:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.2);
 }
 
-#toolbar button:active {
+#toolbar button:active:not(:disabled) {
   background: rgba(255, 255, 255, 0.25);
 }
 
@@ -495,4 +500,114 @@ webview.loading {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
+}
+
+/* ===== On-Screen Keyboard ===== */
+#osk {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(20, 20, 25, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 15px;
+  z-index: 20000;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  min-width: 500px;
+  max-width: 90%;
+}
+
+#osk.hidden {
+  display: none;
+}
+
+#osk-preview {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 10px 15px;
+  margin-bottom: 12px;
+  font-size: 18px;
+  color: #fff;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+}
+
+#osk-input-text {
+  color: #fff;
+  word-break: break-all;
+}
+
+#osk-cursor {
+  color: #2196F3;
+  animation: blink 1s infinite;
+  margin-left: 1px;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+#osk-keys {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.osk-key {
+  background: rgba(60, 60, 70, 0.8);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 12px 8px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  text-align: center;
+  min-width: 40px;
+}
+
+.osk-key:hover {
+  background: rgba(80, 80, 90, 0.9);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.osk-key.selected {
+  background: #2196F3;
+  border-color: #64B5F6;
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(33, 150, 243, 0.5);
+}
+
+.osk-key.wide {
+  grid-column: span 2;
+}
+
+.osk-key.special {
+  background: rgba(80, 80, 100, 0.8);
+  font-size: 12px;
+}
+
+.osk-key.special.selected {
+  background: #1976D2;
+}
+
+#osk-hints {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#osk-hints b {
+  color: #2196F3;
+  font-weight: 600;
 }
