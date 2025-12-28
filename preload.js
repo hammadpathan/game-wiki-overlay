@@ -4,6 +4,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onClickThroughChanged: (callback) => {
     ipcRenderer.on('click-through-changed', (event, enabled) => callback(enabled));
   },
+  onGamepadAction: (callback) => {
+    ipcRenderer.on('gamepad-action', (event, action) => callback(action));
+  },
+  onAnalogInput: (callback) => {
+    ipcRenderer.on('analog-input', (event, data) => callback(data));
+  },
   closeWindow: () => {
     ipcRenderer.send('close-window');
   },

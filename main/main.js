@@ -2,11 +2,21 @@ const { app, ipcMain, screen } = require('electron');
 const { createWindow, getMainWindow } = require('./window');
 const { setupShortcuts } = require('./shortcuts');
 const { setupSecurity } = require('./security');
+const { startPolling, stopPolling } = require('./gamepad');
 
 app.whenReady().then(() => {
   setupSecurity();
   createWindow();
   setupShortcuts();
+  
+  // Start gamepad polling (Windows only)
+  if (process.platform === 'win32') {
+    try {
+      startPolling();
+    } catch (err) {
+      console.log('Gamepad support not available:', err.message);
+    }
+  }
 });
 
 // Handle close window request from renderer
@@ -80,6 +90,7 @@ ipcMain.on('set-opacity', (event, opacity) => {
 });
 
 app.on('window-all-closed', () => {
+  stopPolling();
   if (process.platform !== 'darwin') {
     app.quit();
   }

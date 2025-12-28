@@ -28,6 +28,25 @@ npm start
 - **Ctrl+Shift+W** - Toggle overlay visibility
 - **Ctrl+Shift+C** - Toggle click-through mode (overlay becomes non-interactive)
 
+### Controller Support (Xbox/XInput)
+
+A virtual cursor appears when you use the controller, letting you click any link or button!
+
+| Button | Action |
+|--------|--------|
+| **Back + Start** | Toggle overlay visibility (works in-game!) |
+| **Left Stick** | Move cursor |
+| **D-pad** | Move cursor (with repeat) |
+| **Right Stick** | Scroll page |
+| **A** | Click at cursor position |
+| **B** | Go back |
+| **Y** | Home (wiki selection) |
+| **X** | Focus search box |
+| **LB / RB** | Page up / Page down |
+| **Start** | Hide overlay (return to game) |
+
+> Controller works even when your game has focus - no external tools needed!
+
 ### How to Use
 
 1. Launch the app with `npm start`

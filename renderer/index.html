@@ -84,6 +84,7 @@
     </div>
 
     <p class="hint">💡 Use <kbd>Ctrl+Shift+W</kbd> to toggle visibility, <kbd>Ctrl+Shift+C</kbd> for click-through mode</p>
+    <p class="hint">🎮 Controller: <kbd>Left Stick</kbd> move cursor, <kbd>A</kbd> click, <kbd>B</kbd> back, <kbd>Y</kbd> home, <kbd>Right Stick</kbd> scroll</p>
   </div>
 
   <!-- Webview (hidden initially) -->
@@ -92,6 +93,12 @@
     src="about:blank"
     allowpopups="false">
   </webview>
+
+  <!-- Virtual cursor for gamepad navigation -->
+  <div id="gamepad-cursor">
+    <div class="cursor-ring"></div>
+    <div class="cursor-dot"></div>
+  </div>
 
   <!-- Resize handles (at end for highest stacking) -->
   <div class="resize-handle resize-n"></div>
