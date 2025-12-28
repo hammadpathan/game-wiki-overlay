@@ -1,0 +1,360 @@
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(20, 20, 20, 0.95);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  overflow: hidden;
+}
+
+/* ===== Resize Handles ===== */
+.resize-handle {
+  position: fixed;
+  z-index: 10000;
+  background: transparent;
+  -webkit-app-region: no-drag !important;
+  pointer-events: auto !important;
+}
+
+.resize-handle:hover {
+  background: rgba(100, 149, 237, 0.3);
+}
+
+.resize-n, .resize-s {
+  left: 12px;
+  right: 12px;
+  height: 8px;
+  cursor: ns-resize;
+}
+
+.resize-n { top: 0; }
+.resize-s { bottom: 0; }
+
+.resize-e, .resize-w {
+  top: 12px;
+  bottom: 12px;
+  width: 8px;
+  cursor: ew-resize;
+}
+
+.resize-e { right: 0; }
+.resize-w { left: 0; }
+
+.resize-ne, .resize-nw, .resize-se, .resize-sw {
+  width: 14px;
+  height: 14px;
+}
+
+.resize-ne { top: 0; right: 0; cursor: nesw-resize; }
+.resize-nw { top: 0; left: 0; cursor: nwse-resize; }
+.resize-se { bottom: 0; right: 0; cursor: nwse-resize; }
+.resize-sw { bottom: 0; left: 0; cursor: nesw-resize; }
+
+/* Corner indicators */
+.resize-se::after, .resize-sw::after, .resize-ne::after, .resize-nw::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-color: rgba(255, 255, 255, 0.3);
+  border-style: solid;
+  border-width: 0;
+}
+
+.resize-se::after {
+  bottom: 2px;
+  right: 2px;
+  border-right-width: 2px;
+  border-bottom-width: 2px;
+}
+
+.resize-sw::after {
+  bottom: 2px;
+  left: 2px;
+  border-left-width: 2px;
+  border-bottom-width: 2px;
+}
+
+.resize-ne::after {
+  top: 2px;
+  right: 2px;
+  border-right-width: 2px;
+  border-top-width: 2px;
+}
+
+.resize-nw::after {
+  top: 2px;
+  left: 2px;
+  border-left-width: 2px;
+  border-top-width: 2px;
+}
+
+/* ===== Toolbar ===== */
+#toolbar {
+  display: flex;
+  align-items: center;
+  height: 36px;
+  background: rgba(30, 30, 30, 0.98);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0 8px 0 16px;
+  gap: 8px;
+  position: relative;
+  z-index: 100;
+  -webkit-app-region: drag;
+}
+
+#drag-bar {
+  width: 40px;
+  height: 100%;
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#drag-bar::before {
+  content: '⋮⋮';
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+
+#search-container {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 4px;
+}
+
+#search-input {
+  flex: 1;
+  max-width: 300px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 13px;
+  outline: none;
+  transition: background 0.2s;
+  -webkit-app-region: no-drag;
+}
+
+#search-input:focus {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+#search-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+#toolbar button {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+  -webkit-app-region: no-drag;
+}
+
+#toolbar button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+#toolbar button:active {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+#close-btn {
+  background: rgba(255, 70, 70, 0.2);
+  margin-left: auto;
+}
+
+#close-btn:hover {
+  background: rgba(255, 70, 70, 0.5);
+}
+
+#status {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  padding: 0 8px;
+  white-space: nowrap;
+}
+
+#status.click-through {
+  color: #ff6b6b;
+}
+
+/* ===== Landing Page ===== */
+#landing-page {
+  width: 100%;
+  height: calc(100% - 36px);
+  padding: 24px 32px;
+  overflow-y: auto;
+  color: #fff;
+}
+
+#landing-page h1 {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+#landing-page .subtitle {
+  margin: 0 0 24px 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+}
+
+#landing-page h2 {
+  margin: 24px 0 16px 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+#wiki-search-container {
+  display: flex;
+  gap: 8px;
+  max-width: 500px;
+}
+
+#wiki-url-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+#wiki-url-input:focus {
+  border-color: rgba(100, 149, 237, 0.6);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+#wiki-url-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+#go-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  background: #4a9eff;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#go-btn:hover {
+  background: #3a8eef;
+}
+
+/* Wiki Grid */
+#wiki-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  max-width: 800px;
+}
+
+.wiki-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.wiki-card:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.wiki-card:active {
+  transform: translateY(0);
+}
+
+.wiki-icon {
+  font-size: 28px;
+}
+
+.wiki-name {
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.hint {
+  margin-top: 32px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.hint kbd {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  font-family: monospace;
+  font-size: 11px;
+}
+
+/* ===== Webview ===== */
+webview {
+  width: 100%;
+  height: calc(100% - 36px);
+  border: none;
+  display: none;
+}
+
+webview.active {
+  display: flex;
+}
+
+/* Loading state */
+webview.loading {
+  opacity: 0.7;
+}
+
+/* Hide landing page when wiki is active */
+#landing-page.hidden {
+  display: none;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}

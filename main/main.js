@@ -1,89 +1,78 @@
-const { app, BrowserWindow, globalShortcut, ipcMain } = require('electron');
-const path = require('path');
-
-let mainWindow;
-let isVisible = true;
-let clickThrough = false;
-
-function createWindow() {
-  // Get screen dimensions for 3/4 size in landscape
-  const { screen } = require('electron');
-  const primaryDisplay = screen.getPrimaryDisplay();
-  const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize;
-  
-  // Calculate 3/4 screen size in landscape orientation
-  const windowWidth = Math.floor(screenWidth * 0.75);
-  const windowHeight = Math.floor(screenHeight * 0.75);
-  
-  // Center the window
-  const x = Math.floor((screenWidth - windowWidth) / 2);
-  const y = Math.floor((screenHeight - windowHeight) / 2);
-  
-  mainWindow = new BrowserWindow({
-    width: windowWidth,
-    height: windowHeight,
-    minWidth: 400,
-    minHeight: 500,
-    x: x,
-    y: y,
-    transparent: true,
-    frame: false,
-    alwaysOnTop: true,
-    fullscreenable: false,
-    resizable: true,
-    skipTaskbar: true,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: false,
-      contextIsolation: true
-    }
-  });
-
-  mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
-
-  mainWindow.setAlwaysOnTop(true, 'screen-saver');
-  mainWindow.setVisibleOnAllWorkspaces(true);
-  
-  // Ensure window stays on top even during game focus
-  mainWindow.setFocusable(true);
-  
-  // Open DevTools in development
-  // mainWindow.webContents.openDevTools({ mode: 'detach' });
-
-  mainWindow.on('closed', () => {
-    mainWindow = null;
-  });
-}
+const { app, ipcMain, screen } = require('electron');
+const { createWindow, getMainWindow } = require('./window');
+const { setupShortcuts } = require('./shortcuts');
+const { setupSecurity } = require('./security');
 
 app.whenReady().then(() => {
+  setupSecurity();
   createWindow();
-
-  // Toggle overlay
-  globalShortcut.register('CommandOrControl+Shift+W', () => {
-    if (!mainWindow) return;
-    isVisible ? mainWindow.hide() : mainWindow.show();
-    isVisible = !isVisible;
-  });
-
-  // Toggle click-through
-  globalShortcut.register('CommandOrControl+Shift+C', () => {
-    if (!mainWindow) return;
-    clickThrough = !clickThrough;
-    mainWindow.setIgnoreMouseEvents(clickThrough, { forward: true });
-    mainWindow.webContents.send('click-through-changed', clickThrough);
-  });
-
-  // Set click-through from renderer
-  ipcMain.on('set-click-through', (_, value) => {
-    clickThrough = value;
-    mainWindow.setIgnoreMouseEvents(value, { forward: true });
-  });
-
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
-  });
+  setupShortcuts();
 });
 
-app.on('will-quit', () => {
-  globalShortcut.unregisterAll();
+// Handle close window request from renderer
+ipcMain.on('close-window', () => {
+  app.quit();
+});
+
+// Handle resize from renderer - manual implementation
+let resizeInterval = null;
+let resizeDirection = null;
+
+ipcMain.on('start-resize', (event, direction) => {
+  const win = getMainWindow();
+  if (!win) return;
+  
+  resizeDirection = direction;
+  
+  // Clear any existing interval
+  if (resizeInterval) {
+    clearInterval(resizeInterval);
+  }
+  
+  resizeInterval = setInterval(() => {
+    if (!resizeDirection) {
+      clearInterval(resizeInterval);
+      return;
+    }
+    
+    const cursorPos = screen.getCursorScreenPoint();
+    const bounds = win.getBounds();
+    const minWidth = 400;
+    const minHeight = 300;
+    
+    let newBounds = { ...bounds };
+    
+    if (resizeDirection.includes('e')) {
+      newBounds.width = Math.max(minWidth, cursorPos.x - bounds.x);
+    }
+    if (resizeDirection.includes('w')) {
+      const newWidth = Math.max(minWidth, bounds.x + bounds.width - cursorPos.x);
+      newBounds.x = bounds.x + bounds.width - newWidth;
+      newBounds.width = newWidth;
+    }
+    if (resizeDirection.includes('s')) {
+      newBounds.height = Math.max(minHeight, cursorPos.y - bounds.y);
+    }
+    if (resizeDirection.includes('n')) {
+      const newHeight = Math.max(minHeight, bounds.y + bounds.height - cursorPos.y);
+      newBounds.y = bounds.y + bounds.height - newHeight;
+      newBounds.height = newHeight;
+    }
+    
+    win.setBounds(newBounds);
+  }, 16); // ~60fps
+});
+
+ipcMain.on('stop-resize', () => {
+  resizeDirection = null;
+  if (resizeInterval) {
+    clearInterval(resizeInterval);
+    resizeInterval = null;
+  }
+});
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
 });

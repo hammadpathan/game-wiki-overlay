@@ -1,32 +1,104 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Game Wiki Overlay</title>
-  <link rel="stylesheet" href="index.css" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div id="overlay">
-    <h1>🎮 Game Wiki Overlay</h1>
-    <p>Ctrl+Shift+W to toggle | Ctrl+Shift+C for click-through</p>
-    
-    <div class="wiki-selector">
-      <select id="wikiSelect">
-        <option value="minecraft">⛏️ Minecraft</option>
-        <option value="terraria">🗡️ Terraria</option>
-        <option value="stardew">🌾 Stardew Valley</option>
-        <option value="zelda">🗡️ Zelda</option>
-        <option value="eldenring">💍 Elden Ring</option>
-        <option value="darksouls">🔥 Dark Souls</option>
-      </select>
+  <div id="toolbar">
+    <div id="drag-bar"></div>
+    <div id="search-container">
+      <input type="text" id="search-input" placeholder="Search wiki..." />
+      <button id="search-btn" title="Search">🔍</button>
+      <button id="back-btn" title="Go back">←</button>
+      <button id="forward-btn" title="Go forward">→</button>
+      <button id="home-btn" title="Wiki selection">🏠</button>
     </div>
-    
-    <input type="text" id="searchInput" placeholder="Search wiki..." autofocus />
-    <div id="content">
-      <p>Select a game and type something to search!</p>
-    </div>
+    <div id="status"></div>
+    <button id="close-btn" title="Close">✕</button>
   </div>
 
-  <script type="module" src="index.js"></script>
+  <!-- Landing Page -->
+  <div id="landing-page">
+    <h1>🎮 Game Wiki Overlay</h1>
+    <p class="subtitle">Select a wiki or enter a custom URL</p>
+    
+    <div id="wiki-search-container">
+      <input type="text" id="wiki-url-input" placeholder="Enter wiki URL (e.g., https://zelda.fandom.com)" />
+      <button id="go-btn">Go</button>
+    </div>
+
+    <h2>Popular Game Wikis</h2>
+    <div id="wiki-grid">
+      <button class="wiki-card" data-url="https://minecraft.wiki" data-search="https://minecraft.wiki/w/Special:Search?search=">
+        <span class="wiki-icon">⛏️</span>
+        <span class="wiki-name">Minecraft</span>
+      </button>
+      <button class="wiki-card" data-url="https://terraria.wiki.gg" data-search="https://terraria.wiki.gg/index.php?search=">
+        <span class="wiki-icon">🌳</span>
+        <span class="wiki-name">Terraria</span>
+      </button>
+      <button class="wiki-card" data-url="https://stardewvalleywiki.com" data-search="https://stardewvalleywiki.com/mediawiki/index.php?search=">
+        <span class="wiki-icon">🌾</span>
+        <span class="wiki-name">Stardew Valley</span>
+      </button>
+      <button class="wiki-card" data-url="https://zelda.fandom.com" data-search="https://zelda.fandom.com/wiki/Special:Search?query=">
+        <span class="wiki-icon">🗡️</span>
+        <span class="wiki-name">Zelda</span>
+      </button>
+      <button class="wiki-card" data-url="https://darksouls.wiki.fextralife.com" data-search="https://darksouls.wiki.fextralife.com/search?q=">
+        <span class="wiki-icon">🔥</span>
+        <span class="wiki-name">Dark Souls</span>
+      </button>
+      <button class="wiki-card" data-url="https://eldenring.wiki.fextralife.com" data-search="https://eldenring.wiki.fextralife.com/search?q=">
+        <span class="wiki-icon">💍</span>
+        <span class="wiki-name">Elden Ring</span>
+      </button>
+      <button class="wiki-card" data-url="https://hollowknight.wiki.gg" data-search="https://hollowknight.wiki.gg/index.php?search=">
+        <span class="wiki-icon">🪲</span>
+        <span class="wiki-name">Hollow Knight</span>
+      </button>
+      <button class="wiki-card" data-url="https://baldursgate3.wiki.fextralife.com" data-search="https://baldursgate3.wiki.fextralife.com/search?q=">
+        <span class="wiki-icon">🎲</span>
+        <span class="wiki-name">Baldur's Gate 3</span>
+      </button>
+      <button class="wiki-card" data-url="https://palworld.wiki.gg" data-search="https://palworld.wiki.gg/index.php?search=">
+        <span class="wiki-icon">🐾</span>
+        <span class="wiki-name">Palworld</span>
+      </button>
+      <button class="wiki-card" data-url="https://www.poewiki.net" data-search="https://www.poewiki.net/index.php?search=">
+        <span class="wiki-icon">⚔️</span>
+        <span class="wiki-name">Path of Exile</span>
+      </button>
+      <button class="wiki-card" data-url="https://leagueoflegends.fandom.com" data-search="https://leagueoflegends.fandom.com/wiki/Special:Search?query=">
+        <span class="wiki-icon">🏆</span>
+        <span class="wiki-name">League of Legends</span>
+      </button>
+      <button class="wiki-card" data-url="https://genshin-impact.fandom.com" data-search="https://genshin-impact.fandom.com/wiki/Special:Search?query=">
+        <span class="wiki-icon">⭐</span>
+        <span class="wiki-name">Genshin Impact</span>
+      </button>
+    </div>
+
+    <p class="hint">💡 Use <kbd>Ctrl+Shift+W</kbd> to toggle visibility, <kbd>Ctrl+Shift+C</kbd> for click-through mode</p>
+  </div>
+
+  <!-- Webview (hidden initially) -->
+  <webview
+    id="wiki"
+    src="about:blank"
+    allowpopups="false">
+  </webview>
+
+  <!-- Resize handles (at end for highest stacking) -->
+  <div class="resize-handle resize-n"></div>
+  <div class="resize-handle resize-s"></div>
+  <div class="resize-handle resize-e"></div>
+  <div class="resize-handle resize-w"></div>
+  <div class="resize-handle resize-ne"></div>
+  <div class="resize-handle resize-nw"></div>
+  <div class="resize-handle resize-se"></div>
+  <div class="resize-handle resize-sw"></div>
+
+  <script src="renderer.js"></script>
 </body>
 </html>
